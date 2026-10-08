@@ -1,6 +1,6 @@
 # tests
 
-Every acceptance criterion in [PRD §17](../docs/PRD_v1.7.md) gets at least one automated test. This map says which module owns it.
+Every acceptance criterion in [PRD §17](../docs/PRD_v1.8.md) gets at least one automated test. This map says which module owns it.
 
 | AC | What it proves | Owning module | Test type |
 |---|---|---|---|

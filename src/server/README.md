@@ -16,9 +16,9 @@ Server-only domain modules for the Next.js app. Nothing here is ever bundled int
 | `media` | Upload, Groq Whisper transcription, tags, search |
 | `attribution` | First/last touch, spend |
 | `reports` | Morning report, alerts, diagnostics |
-| `jobs` | Bolt Database cron schedules and the retry jobs table |
+| `jobs` | Supabase Cron (pg_cron) schedules and the retry jobs table |
 | `auth` | Agent/Helper roles, MFA |
-| `db` | Bolt Database schema, migrations, row-level security |
+| `db` | Supabase schema, migrations, row-level security |
 
 HTTP entry points live in [../app/api](../app/api). Dependency rules are in [../../docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md).
 

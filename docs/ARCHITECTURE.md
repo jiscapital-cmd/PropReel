@@ -1,15 +1,15 @@
 # PropReel Architecture
 
-Companion to [PRD v1.7](PRD_v1.7.md) §12. Describes the planned module layout; no code exists yet.
+Companion to [PRD v1.8](PRD_v1.8.md) §12. Describes the planned module layout; no code exists yet.
 
 ## Stack
 | Layer | Choice |
 |---|---|
 | App | One full-stack Next.js app (TypeScript): PWA screens in `src/app`, server modules in `src/server` |
 | API | Next.js API routes in `src/app/api`: app API for the PWA and webhook receivers |
-| Scheduled jobs | Bolt Database cron, plus a jobs table for retries (`src/server/jobs`) |
+| Scheduled jobs | Supabase Cron (pg_cron), plus a jobs table for retries (`src/server/jobs`) |
 | LLM | Anthropic TypeScript SDK: Claude Haiku 5.5 `claude-haiku-5-5` (classify), Claude Sonnet 5.5 `claude-sonnet-5-5` (drafts, briefs) |
-| Data | Bolt Database (Postgres), SQL migrations, pgvector, row-level security (`src/server/db`) |
+| Data | Supabase (Postgres), SQL migrations, pgvector, row-level security (`src/server/db`) |
 | Media | S3/R2 signed uploads, FFmpeg preview, Groq Whisper API transcription |
 | Email | Gmail API (1:1), Resend (bulk + transactional, authenticated subdomain) |
 
@@ -18,14 +18,14 @@ Companion to [PRD v1.7](PRD_v1.7.md) §12. Describes the planned module layout; 
 src/app (PWA screens)
    │  same app, session cookie, MFA
    ▼
-src/app/api (routes) ─────────► src/server/jobs (Bolt Database cron + jobs table)
+src/app/api (routes) ─────────► src/server/jobs (Supabase Cron (pg_cron) + jobs table)
    │                                  │
    ▼                                  ▼
 ingest → classify → scoring → drafting → compliance → [Agent approves] → approvals
                                                                             │
 content · media · sequences · attribution · reports                         ▼
                                                                          sender ──► Gmail / Resend / Meta / YouTube
-   all modules read/write through db (Bolt Database)     audit_event written by every decision
+   all modules read/write through db (Supabase)     audit_event written by every decision
 ```
 
 ## Dependency rules
@@ -56,7 +56,7 @@ Nightly cron → `sequences` picks due enrollments → renders the template-segm
 **Reel (WF-7)**
 Monday 06:30 cron → `drafting` writes 7 briefs → `compliance` pre-check → Agent approves → Agent films and uploads → `media` transcribes with Groq Whisper → `content` builds the kit with a keyword → Agent approves and posts by hand → registers URL → `attribution` and `reports` measure.
 
-## Scheduled jobs (Bolt Database cron)
+## Scheduled jobs (Supabase Cron (pg_cron))
 | Schedule | Job |
 |---|---|
 | Every 15 min | YouTube comment poll; reply-window check (alert at T-2 h) |

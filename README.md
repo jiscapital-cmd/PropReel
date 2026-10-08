@@ -9,7 +9,7 @@ A UGC-to-lead engine for one licensed real estate agent. It turns phone-shot ree
 ## Docs
 | File | What it is |
 |---|---|
-| [docs/PRD_v1.7.md](docs/PRD_v1.7.md) | Product requirements, V1 scope, acceptance criteria AC-1 to AC-23 |
+| [docs/PRD_v1.8.md](docs/PRD_v1.8.md) | Product requirements, V1 scope, acceptance criteria AC-1 to AC-23 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Module map, dependency rules, request flows |
 | [docs/Reel_Playbook.md](docs/Reel_Playbook.md) | The seven weekly reel formats, hooks, CTAs, compliance notes |
 | [docs/benchmarks/producer_benchmark.csv](docs/benchmarks/producer_benchmark.csv) | Reel and YouTube data for five Houston producers (7 Oct 2026) |
@@ -17,7 +17,7 @@ A UGC-to-lead engine for one licensed real estate agent. It turns phone-shot ree
 ## Stack
 One full-stack Next.js app (TypeScript). No separate backend, no Python.
 - **App and API:** Next.js PWA screens and API routes (app API + webhooks)
-- **Database and scheduled jobs:** Bolt Database (Postgres, pgvector, row-level security); Bolt Database cron for scheduled work
+- **Database and scheduled jobs:** Supabase (Postgres, pgvector, row-level security); Supabase Cron (pg_cron) for scheduled work
 - **LLM:** Anthropic TypeScript SDK. Claude Haiku 5.5 (`claude-haiku-5-5`) classifies; Claude Sonnet 5.5 (`claude-sonnet-5-5`) drafts.
 - **Email:** Gmail API for 1:1 replies; Resend for bulk and transactional email from an authenticated subdomain
 - **Transcription:** Groq Whisper API

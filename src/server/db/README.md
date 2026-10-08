@@ -1,6 +1,6 @@
 # `db`
 
-Schema and SQL migrations for the core tables in Bolt Database (Postgres), plus row-level security policies.
+Schema and SQL migrations for the core tables in Supabase (Postgres), plus row-level security policies.
 
 **PRD:** §12a  
 **Owns tables:** all 16 tables  

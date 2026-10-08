@@ -1,6 +1,6 @@
 # `jobs`
 
-Scheduled and retryable work, run by Bolt Database cron. Failed work (e.g., a Meta lead fetch) is written to a `jobs` table and retried with backoff.
+Scheduled and retryable work, run by Supabase Cron (pg_cron). Failed work (e.g., a Meta lead fetch) is written to a `jobs` table and retried with backoff.
 
 **PRD:** §05 T3, §12 Scheduled jobs  
 **Owns tables:** `jobs`  

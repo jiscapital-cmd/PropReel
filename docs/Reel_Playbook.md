@@ -1,5 +1,5 @@
 # PropReel Reel Playbook
-Companion to *PropReel V1 PRD v1.7* (§04a, §06 WF-7) · 7 October 2026
+Companion to *PropReel V1 PRD v1.8* (§04a, §06 WF-7) · 7 October 2026
 
 This is the reference the `/reel-prep` and `/reel-kit` prompt templates draw on. It defines the seven weekly formats, how each one opens, what to film, and what call to action it carries. Hooks below are starting points in the Agent's voice; they are original and do not copy any benchmark producer's lines. Replace `[AREA]`, `[PROPERTY]` and `[TOPIC]` with real values; the brand voice file overrides tone.
 
