@@ -1,10 +1,10 @@
 # tests
 
-Every acceptance criterion in [PRD §17](../docs/PRD_v1.6.md) gets at least one automated test. This map says which module owns it.
+Every acceptance criterion in [PRD §17](../docs/PRD_v1.7.md) gets at least one automated test. This map says which module owns it.
 
 | AC | What it proves | Owning module | Test type |
 |---|---|---|---|
-| AC-1 | Capture-ready in ≤60 min, push + MFA set up | `auth`, `web` | end-to-end |
+| AC-1 | Capture-ready in ≤60 min, push + MFA set up | `auth`, `app` | end-to-end |
 | AC-2 | Fair-housing phrase sets: 100% blocked, ≤10% false positives | `compliance` | unit (phrase suites) |
 | AC-3 | Meta lead form → lead + draft in 5 min | `ingest`, `jobs` | integration |
 | AC-4 | "Do you buy houses" comment → direct-offer lead with disclosure | `ingest`, `classify`, `drafting` | integration |

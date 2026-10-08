@@ -1,6 +1,6 @@
 # PropReel V1 — Product Requirements Document
 **UGC-to-Lead Engine for a Single Real Estate Agent**
-Version 1.6 · 8 October 2026 · Status: Ready for build
+Version 1.7 · 8 October 2026 · Status: Ready for build
 Companion doc: *PropReel Vision PRD v3.3* (Phases 2–4). This document defines V1 only.
 
 ### Changelog
@@ -13,6 +13,7 @@ Companion doc: *PropReel Vision PRD v3.3* (Phases 2–4). This document defines 
 | v1.4 | Content benchmarks (§04a): five Houston producers studied from public sources, figures verified or marked unverified. Weekly brief mix becomes seven named formats (§06 WF-7) backed by the companion *PropReel Reel Playbook*. Home-value request and neighborhood-guide lead magnets added to T1. Track A targets checked against benchmarks (unchanged, rationale added). SEO neighborhood pages added to §18. |
 | v1.5 | Reel-level benchmark data added to §04a (Instagram reels for 7 accounts + 5 YouTube channels, collected 7 Oct 2026; source file `benchmarks/producer_benchmark.csv`). Format ranking by evidence in WF-7; F7 must carry a real estate angle or CTA. Optional collaborator accounts on post kits (§11, §12a). Diagnostic content metrics added to §16 (views ÷ followers, CTA rate, leads per reel). |
 | v1.6 | Stack change (§12): Python 3.12 FastAPI backend with SQLAlchemy + Alembic and the Inngest Python SDK; Next.js PWA is the UI only and calls the API. PropReel moves to its own repository, separate from the Lead-to-Closing OS. |
+| v1.7 | Single-stack Next.js (§12): replaces the Python FastAPI backend. Next.js API routes handle webhooks and the app API; Bolt Database cron handles scheduled jobs. No Inngest, no Python. Resend chosen for bulk/transactional email (replaces "Postmark/Resend"). Groq Whisper API chosen for transcription (replaces "Deepgram/Whisper"). Classification model updated to Claude Haiku 5.5 (`claude-haiku-5-5`); drafts stay on Claude Sonnet 5.5 (`claude-sonnet-5-5`). |
 
 ---
 
@@ -58,7 +59,7 @@ Companion doc: *PropReel Vision PRD v3.3* (Phases 2–4). This document defines 
 | Geography | ONE US metro + ONE state rule pack in V1. Expansion = new rule pack, not new code. |
 | Commercialization gate | 90-day pilot results (§16) become the case study for selling to other solo agents. Indicative future price: $100–150/mo — **pricing/billing is NOT built in V1**. |
 | Budget — AI + media | ≤ $100/month (hard stop on generation jobs). Covers LLM calls, transcription, media processing. |
-| Budget — infrastructure | Separate line, target ≤ $75/month: hosting, Postgres, job runner, object storage, transactional/bulk email provider, sending domain. Not subject to the AI hard stop. |
+| Budget — infrastructure | Separate line, target ≤ $75/month: hosting, Bolt Database, object storage, transactional/bulk email provider, sending domain. Not subject to the AI hard stop. |
 | Ad spend | Separate, manually managed in Meta Ads Manager, NOT optimized by V1. V1 only reads spend for reporting. |
 | Time zones | Market time zone (pilot: America/Chicago) drives report times and quiet hours. Each user's personal time zone is configurable and shown alongside market time (the operator may be UTC+5:30). |
 
@@ -266,7 +267,7 @@ The Agent may swap any format in a given week; the mix of 3 seller, 3 buyer/tena
 
 ## 09. Business / Decision Rules
 
-**Classification.** LLM classifier (Claude Haiku 4.5) + rules fallback. `lead_type` ∈ {seller_listing, seller_direct_offer, buyer_tenant, investor_hold, other}; `intent` ∈ {sell_request, offer_question, availability, viewing_request, application_question, price_question, accommodation_request, praise, complaint, general, spam}. Rules fire first on keywords (SELL, VIEW, OFFER, per-piece keywords, "still available", "how much", "do you buy"); LLM resolves the rest. "Do you buy houses" / `OFFER` → `seller_direct_offer`; `SELL` / "list my home" → `seller_listing`; ambiguous → `seller_listing` + clarifying question.
+**Classification.** LLM classifier (Claude Haiku 5.5) + rules fallback. `lead_type` ∈ {seller_listing, seller_direct_offer, buyer_tenant, investor_hold, other}; `intent` ∈ {sell_request, offer_question, availability, viewing_request, application_question, price_question, accommodation_request, praise, complaint, general, spam}. Rules fire first on keywords (SELL, VIEW, OFFER, per-piece keywords, "still available", "how much", "do you buy"); LLM resolves the rest. "Do you buy houses" / `OFFER` → `seller_direct_offer`; `SELL` / "list my home" → `seller_listing`; ambiguous → `seller_listing` + clarifying question.
 **Review threshold:** items below the calibrated confidence threshold go to the human-review tab and are never auto-drafted. The threshold starts at 0.6 and is **calibrated against a labelled eval set** (≥200 real or realistic messages, built in weeks 1–2 by the Agent + builder, extended with every Agent correction) so that ≥95% of above-threshold items are correctly classified.
 
 **Fairness rule for ALL scoring (seller and buyer/tenant).** Scoring may use only the inputs listed below. It **never** uses name, photo, profile text, language, location of the person (as opposed to the property), or any protected characteristic or proxy. Same criteria for everyone.
@@ -337,14 +338,14 @@ Six screens (mobile-first PWA). Default landing screen: **Today**.
 
 | Layer | Choice |
 |---|---|
-| Frontend | Next.js (React/TypeScript) PWA, Tailwind — UI only, calls the FastAPI backend; mobile upload + filming cards; web push |
-| API | Python 3.12 + FastAPI; pydantic schemas; webhook receivers (Meta leadgen + IG/FB comments/messaging, Calendly, Gmail push, email provider events); link-in-bio router |
-| Backend | Inngest durable jobs via the Inngest Python SDK (served by FastAPI): signal processing, lead fetch, YouTube polling, sequences, nightly attribution + spend pull, morning report, reply-window checks; rules + LLM with provider abstraction (Anthropic Python SDK) — **Claude Haiku 4.5** for classification, **Claude Sonnet 5.5** for drafts/briefs |
+| App | Single full-stack Next.js app (React/TypeScript): PWA screens (Tailwind; mobile upload + filming cards; web push) and server code in one codebase |
+| API | Next.js API routes: app API for the PWA and webhook receivers (Meta leadgen + IG/FB comments/messaging, Calendly, Gmail push, email provider events); link-in-bio router |
+| Scheduled jobs | Bolt Database cron: YouTube polling (15 min), reply-window checks, nightly sequences, 06:30 attribution + spend pull, 07:30 morning report, Monday 06:30 weekly briefs, and retry of failed work (e.g., Meta lead fetch, retried with backoff for 24 h) from a jobs table. Event-driven work (classify → score → draft on a new message) runs from the webhook's API route. LLM calls through the Anthropic TypeScript SDK with a provider abstraction — **Claude Haiku 5.5** (`claude-haiku-5-5`) for classification, **Claude Sonnet 5.5** (`claude-sonnet-5-5`) for drafts/briefs |
 | Sender service | The only component able to send. Verifies role, approval hash + type + TTL, consent, suppression, quiet hours, caps, reply window, kill switch — refuses on any failure |
-| Media | Direct upload → object storage (S3/R2, signed URLs) → FFmpeg preview → transcription (Deepgram/Whisper) → auto-tags → transcript search. **V1 scope: upload, transcribe, tag, search. No auto-editing.** |
-| Integrations | Meta Graph API (comments, messaging, leadgen, read-only ads insights), YouTube Data API (comment polling + replies), Gmail API (owner mailbox), Postmark/Resend (bulk + transactional), Calendly |
-| Email sending | Dual-sender: Gmail API for 1:1 (owner mailbox); Postmark/Resend for bulk nurture from an authenticated subdomain (e.g., `mail.brand.com`) with SPF/DKIM/DMARC; open/click/reply via webhooks; **domain warm-up starts in build week 2** (≤20/day, ramp ~3 weeks) so bulk is ready when the nurture engine ships |
-| Database | Postgres 16 + pgvector; SQLAlchemy 2 models, Alembic migrations; core tables in §12a; row-level security by workspace and role |
+| Media | Direct upload → object storage (S3/R2, signed URLs) → FFmpeg preview → transcription (Groq Whisper API) → auto-tags → transcript search. **V1 scope: upload, transcribe, tag, search. No auto-editing.** |
+| Integrations | Meta Graph API (comments, messaging, leadgen, read-only ads insights), YouTube Data API (comment polling + replies), Gmail API (owner mailbox), Resend (bulk + transactional), Calendly |
+| Email sending | Dual-sender: Gmail API for 1:1 (owner mailbox); Resend for bulk nurture from an authenticated subdomain (e.g., `mail.brand.com`) with SPF/DKIM/DMARC; open/click/reply via webhooks; **domain warm-up starts in build week 2** (≤20/day, ramp ~3 weeks) so bulk is ready when the nurture engine ships |
+| Database | Bolt Database (Postgres); SQL migrations; pgvector for transcript search; core tables in §12a; row-level security by workspace and role |
 | Security | OAuth tokens KMS-encrypted; MFA required for both roles (Agent approval rights activate only after MFA); signed expiring links; append-only audit log |
 
 **Meta permissions (submit for App Review + Business Verification in build week 1):** `leads_retrieval`, `pages_manage_metadata`, `pages_show_list`, `pages_read_engagement`, `pages_messaging`, `instagram_basic`, `instagram_manage_comments`, `instagram_manage_messages`, `ads_read`. Until approved: development-mode access on the Agent's own accounts + **manual lead capture fallback** (Meta instant-form leads CSV export/import → dedupe on import; manual paste for DMs/comments). Instant forms work without messaging permissions, so paid leads can flow before DM automation is approved.

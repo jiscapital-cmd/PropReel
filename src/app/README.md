@@ -1,6 +1,6 @@
-# web
+# src/app
 
-Next.js PWA, mobile first. UI only: every read and write goes through the FastAPI backend.
+Next.js App Router: the six PWA screens (mobile first) and, under [api/](api), the API routes. Screens call the app's own API routes; server logic lives in [../server](../server).
 
 **PRD:** §11
 
@@ -16,7 +16,7 @@ Next.js PWA, mobile first. UI only: every read and write goes through the FastAP
 Web push for hot-lead alerts. On iOS, push works only after the app is added to the Home Screen; onboarding covers this.
 
 **Must never**
-- Hold API keys or send logic
+- Import from `src/server` in client components, or expose API keys to the browser
 - Show approve or send controls to the Helper role
 
 *Placeholder: no code yet.*

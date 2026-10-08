@@ -1,6 +1,6 @@
 # `classify`
 
-Decide `lead_type` and `intent` for each message: keyword rules first, then Claude Haiku 4.5.
+Decide `lead_type` and `intent` for each message: keyword rules first, then Claude Haiku 5.5 (`claude-haiku-5-5`).
 
 **PRD:** §09 Classification  
 **Owns tables:** `lead` (lead_type, intent)  

@@ -3,21 +3,13 @@
 .env.*
 !.env.example
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-*.egg-info/
-
 # Node / Next.js
 node_modules/
 .next/
 out/
 *.tsbuildinfo
+next-env.d.ts
+coverage/
 
 # Local data and media
 *.log

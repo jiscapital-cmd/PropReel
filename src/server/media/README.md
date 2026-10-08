@@ -1,6 +1,6 @@
 # `media`
 
-Handle phone video: signed upload to S3/R2, FFmpeg preview, transcription (Deepgram/Whisper), auto-tags, transcript search (pgvector).
+Handle phone video: signed upload to S3/R2, FFmpeg preview, transcription (Groq Whisper API), auto-tags, transcript search (pgvector).
 
 **PRD:** §12 Media  
 **Owns tables:** media fields on `content_piece`  
